@@ -48,9 +48,7 @@ export class Game {
         this.handleAnswer(false);
       }
     };
-
     setInterval(detectCollision, 100);
-    
     this.container.addEventListener('optionsMissed', () => {
       this.nextQuestion();
     });
@@ -89,9 +87,8 @@ export class Game {
   }
 
   private endGame(): void {
-    alert(`Game Over! Your score: ${this.score}/${questions.length}`);
+    console.log(`Game Over! Your score: ${this.score}/${questions.length}`);
     this.currentQuestionIndex = 0;
     this.score = 0;
-    this.startQuiz();
   }
 }

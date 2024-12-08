@@ -4,6 +4,7 @@ export class QuizUI {
   private falseOption: HTMLElement | null = null;
   private optionsSpeed: number = 3;
   private animationFrameId: number | null = null;
+  private navHeight: number = 56;
 
   constructor(private container: HTMLElement) {
     this.initialize();
@@ -48,7 +49,8 @@ export class QuizUI {
         this.falseOption.style.top = `${falseTop + this.optionsSpeed}px`;
 
         // Reset if both options are off screen
-        if (trueTop > window.innerHeight && falseTop > window.innerHeight) {
+        const containerHeight = window.innerHeight - this.navHeight;
+        if (trueTop > containerHeight && falseTop > containerHeight) {
           this.resetOptions();
           const event = new CustomEvent("optionsMissed");
           this.container.dispatchEvent(event);

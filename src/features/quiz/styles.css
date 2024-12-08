@@ -28,7 +28,6 @@
   font-size: 18px;
   font-family: var(--primary-font);
   z-index: 100;
-  animation: fallDown 7s linear infinite;
 }
 
 .quiz__option--true {
