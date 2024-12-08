@@ -1,7 +1,11 @@
-import { Metric } from './metrics.ts';
+import { Metric } from './metrics';
+import { generateDummyData } from './dummy-data';
+import { ChartManager } from './chart-manager';
 
 export class ReportsUI {
   private selectedMetrics: Set<string> = new Set();
+  private chartManager: ChartManager | null = null;
+  private reportData: any[] = [];
 
   constructor(private container: HTMLElement, private metrics: Metric[]) {
     this.render();
@@ -34,10 +38,21 @@ export class ReportsUI {
           <button class="generate-report">Generate Report</button>
           <button class="export-csv">Export CSV</button>
           <button class="email-report">Email Report</button>
+          <select class="chart-type">
+            <option value="bar">Bar Chart</option>
+            <option value="line">Line Chart</option>
+          </select>
         </div>
-        <div class="report-preview"></div>
+        <div class="report-preview">
+          <canvas id="chart-container" style="width: 100%; height: 400px;"></canvas>
+        </div>
       </div>
     `;
+
+    const canvas = this.container.querySelector('#chart-container') as HTMLCanvasElement;
+    if (canvas) {
+      this.chartManager = new ChartManager(canvas);
+    }
   }
 
   private setupEventListeners(): void {
@@ -58,6 +73,15 @@ export class ReportsUI {
       });
     });
 
+    const chartTypeSelect = this.container.querySelector('.chart-type') as HTMLSelectElement;
+    chartTypeSelect?.addEventListener('change', (e) => {
+      const target = e.target as HTMLSelectElement;
+      this.chartManager?.setChartType(target.value as 'bar' | 'line');
+      if (this.reportData.length > 0) {
+        this.generateReport();
+      }
+    });
+
     const generateBtn = this.container.querySelector('.generate-report');
     generateBtn?.addEventListener('click', () => this.generateReport());
 
@@ -69,14 +93,48 @@ export class ReportsUI {
   }
 
   private generateReport(): void {
-    console.log('Generating report with metrics:', Array.from(this.selectedMetrics));
+    const selectedMetricsArray = Array.from(this.selectedMetrics);
+    if (selectedMetricsArray.length === 0) {
+      alert('Please select at least one metric');
+      return;
+    }
+
+    this.reportData = generateDummyData(selectedMetricsArray);
+    this.chartManager?.updateChart(this.reportData, selectedMetricsArray);
   }
 
   private exportCSV(): void {
-    console.log('Exporting CSV with metrics:', Array.from(this.selectedMetrics));
+    if (this.reportData.length === 0) {
+      alert('Please generate a report first');
+      return;
+    }
+
+    const headers = ['month', ...Array.from(this.selectedMetrics)];
+    const csvContent = [
+      headers.join(','),
+      ...this.reportData.map(row => 
+        headers.map(header => row[header]).join(',')
+      )
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('hidden', '');
+    a.setAttribute('href', url);
+    a.setAttribute('download', 'report.csv');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
   private emailReport(): void {
+    if (this.reportData.length === 0) {
+      alert('Please generate a report first');
+      return;
+    }
+
+    // Implement email functionality
     console.log('Emailing report with metrics:', Array.from(this.selectedMetrics));
   }
 }
