@@ -1,6 +1,7 @@
 export class Router {
   private routes: Map<string, (container: HTMLElement) => any>;
   private container: HTMLElement;
+  private currentComponent: any = null;
 
   constructor(container: HTMLElement) {
     this.routes = new Map();
@@ -30,8 +31,11 @@ export class Router {
     const componentFn = this.routes.get(path);
 
     if (componentFn) {
+      if (this.currentComponent?.cleanup) {
+        this.currentComponent.cleanup();
+      }
       this.container.innerHTML = "";
-      componentFn(this.container);
+      this.currentComponent = componentFn(this.container);
     }
   }
 

@@ -1,40 +1,45 @@
-import { Car } from './car';
-import { QuizUI, questions } from '../quiz';
+import { Car } from "./car";
+import { QuizUI, questions } from "../quiz";
 
 export class Game {
   private car: Car;
   private quizUI: QuizUI;
   private currentQuestionIndex: number = 0;
   private score: number = 0;
+  private collisionInterval: number | null = null;
+  private handleOptionsMissed: () => void;
 
   constructor(private container: HTMLElement) {
-    const carElement = container.querySelector('.game__car') as HTMLElement;
+    const carElement = container.querySelector(".game__car") as HTMLElement;
     this.car = new Car(carElement);
     this.quizUI = new QuizUI(container);
-    
+
+    this.handleOptionsMissed = () => this.nextQuestion();
+
     this.setupControls();
     this.setupCollisionDetection();
+    this.container.addEventListener("optionsMissed", this.handleOptionsMissed);
     this.startQuiz();
   }
 
   private setupControls(): void {
-    const leftButton = this.container.querySelector('.game__button--left');
-    const rightButton = this.container.querySelector('.game__button--right');
+    const leftButton = this.container.querySelector(".game__button--left");
+    const rightButton = this.container.querySelector(".game__button--right");
 
-    leftButton?.addEventListener('click', () => this.car.moveLeft());
-    rightButton?.addEventListener('click', () => this.car.moveRight());
+    leftButton?.addEventListener("click", () => this.car.moveLeft());
+    rightButton?.addEventListener("click", () => this.car.moveRight());
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') this.car.moveLeft();
-      if (e.key === 'ArrowRight') this.car.moveRight();
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") this.car.moveLeft();
+      if (e.key === "ArrowRight") this.car.moveRight();
     });
   }
 
   private setupCollisionDetection(): void {
     const detectCollision = () => {
-      const carElement = this.container.querySelector('.game__car') as HTMLElement;
-      const trueOption = this.container.querySelector('.quiz__option--true');
-      const falseOption = this.container.querySelector('.quiz__option--false');
+      const carElement = this.container.querySelector(".game__car") as HTMLElement;
+      const trueOption = this.container.querySelector(".quiz__option--true");
+      const falseOption = this.container.querySelector(".quiz__option--false");
 
       if (!carElement || !trueOption || !falseOption) return;
 
@@ -48,10 +53,15 @@ export class Game {
         this.handleAnswer(false);
       }
     };
-    setInterval(detectCollision, 100);
-    this.container.addEventListener('optionsMissed', () => {
-      this.nextQuestion();
-    });
+    this.collisionInterval = window.setInterval(detectCollision, 100);
+  }
+
+  public cleanup(): void {
+    if (this.collisionInterval) {
+      clearInterval(this.collisionInterval);
+    }
+    this.container.removeEventListener("optionsMissed", this.handleOptionsMissed);
+    this.quizUI.cleanup();
   }
 
   private isColliding(rect1: DOMRect, rect2: DOMRect): boolean {
@@ -87,7 +97,7 @@ export class Game {
   }
 
   private endGame(): void {
-    console.log(`Game Over! Your score: ${this.score}/${questions.length}`);
+    alert(`Game Over! Your score: ${this.score}/${questions.length}`);
     this.currentQuestionIndex = 0;
     this.score = 0;
   }

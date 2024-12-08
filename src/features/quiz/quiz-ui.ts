@@ -48,7 +48,6 @@ export class QuizUI {
         this.trueOption.style.top = `${trueTop + this.optionsSpeed}px`;
         this.falseOption.style.top = `${falseTop + this.optionsSpeed}px`;
 
-        // Reset if both options are off screen
         const containerHeight = window.innerHeight - this.navHeight;
         if (trueTop > containerHeight && falseTop > containerHeight) {
           this.resetOptions();
