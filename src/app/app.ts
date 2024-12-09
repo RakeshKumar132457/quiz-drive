@@ -6,6 +6,7 @@ import "../features/reports/styles.css";
 
 export class App {
   private router: Router;
+  // @ts-ignore
   private gameState: GameStateManager;
 
   constructor(container: HTMLElement) {

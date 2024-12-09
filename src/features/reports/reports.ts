@@ -3,6 +3,7 @@ import { metrics } from './metrics.ts';
 import './styles.css';
 
 export class Reports {
+  // @ts-ignore
   private ui: ReportsUI;
 
   constructor(container: HTMLElement) {
